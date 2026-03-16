@@ -302,7 +302,7 @@
       </div>
     </div>
     <div class="topbar-right">
-      <div class="clock" id="clock">--:--:--</div>
+      <div class="clock"><span id="clockDate"></span> &nbsp;|&nbsp; <span id="clock">--:--:--</span></div>
       <button class="refresh-btn" id="refreshBtn" onclick="fetchData(true)">
         <span class="refresh-icon">↻</span> Refresh
       </button>
@@ -407,6 +407,7 @@
   function updateClock() {
     const now = new Date();
     document.getElementById('clock').textContent = now.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    document.getElementById('clockDate').textContent = now.toLocaleDateString('en-MY', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
   }
   setInterval(updateClock, 1000);
   updateClock();
