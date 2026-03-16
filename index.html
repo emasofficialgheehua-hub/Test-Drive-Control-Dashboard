@@ -426,7 +426,7 @@
 
   // ── FETCH DATA via Google Sheets published CSV (no CORS issues) ──
   const SHEET_ID = '15AfHnqsMbILP7f7bAMj_p0sy8p1POiYBDqtdQ1H1lbI';
-  const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+  const CSV_URL  = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTYPkaeQQcFfhKxjTnkV9MTGb0EYCxhPlFAL6yWYkF7k4_zDYwF2mV8i3QPtwztGny-6MQzj7kmyYYI/pub?output=csv`;
 
   async function fetchData(manual = false) {
     clearTimeout(autoRefreshTimer);
