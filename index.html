@@ -446,7 +446,7 @@
         allData = rows.slice(1) // skip header row
           .filter(r => r[0]) // skip empty rows
           .map(r => ({
-            timestamp:       r[0] || '',
+            timestamp:       r[0] ? (parseTimestamp(r[0]) || new Date(r[0])).toISOString() : '',
             usageType:       r[1] || '',
             name:            r[2] || '',
             phone:           r[3] || '',
@@ -472,7 +472,20 @@
     autoRefreshTimer = setTimeout(() => fetchData(), REFRESH_INTERVAL);
   }
 
-  // ── PARSE CSV (handles quoted fields with commas) ──
+  function parseTimestamp(raw) {
+    if (!raw) return null;
+    // Try native parse first
+    let d = new Date(raw);
+    if (!isNaN(d)) return d;
+    // Try DD/MM/YYYY HH:MM:SS or DD/MM/YYYY HH:MM
+    const m = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})[,\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (m) {
+      const year  = m[3].length === 2 ? '20' + m[3] : m[3];
+      d = new Date(`${year}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}T${m[4].padStart(2,'0')}:${m[5]}:${m[6]||'00'}`);
+      if (!isNaN(d)) return d;
+    }
+    return null;
+  }
   function parseCSV(text) {
     const rows = [];
     const lines = text.split('\n');
@@ -496,7 +509,10 @@
   function updateStats() {
     const today = new Date().toDateString();
 
-    const todayRows  = allData.filter(r => new Date(r.timestamp).toDateString() === today);
+    const todayRows  = allData.filter(r => {
+      const d = new Date(r.timestamp);
+      return !isNaN(d) && d.toDateString() === today;
+    });
     const customer   = todayRows.filter(r => r.usageType === 'Customer Test Drive').length;
     const internal   = todayRows.filter(r => r.usageType === 'Internal Use').length;
     const active     = allData.filter(r => r.startTime && !r.endTime).length;
@@ -524,8 +540,8 @@
 
     let data = [...allData].reverse(); // newest first
 
-    if (currentFilter === 'today')  data = data.filter(r => new Date(r.timestamp).toDateString() === today);
-    if (currentFilter === 'week')   data = data.filter(r => new Date(r.timestamp) >= weekAgo);
+    if (currentFilter === 'today')  data = data.filter(r => { const d = new Date(r.timestamp); return !isNaN(d) && d.toDateString() === today; });
+    if (currentFilter === 'week')   data = data.filter(r => { const d = new Date(r.timestamp); return !isNaN(d) && d >= weekAgo; });
     if (currentFilter === 'active') data = data.filter(r => r.startTime && !r.endTime);
 
     if (search) {
@@ -552,7 +568,7 @@
     }
 
     tbody.innerHTML = data.map((r, i) => {
-      const ts        = r.timestamp ? new Date(r.timestamp).toLocaleString('en-MY', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '—';
+      const ts = r.timestamp ? new Date(r.timestamp).toLocaleString('en-MY', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '—';
       const typeBadge = r.usageType === 'Customer Test Drive'
         ? `<span class="badge badge-customer"><span class="badge-dot-sm"></span>Customer</span>`
         : `<span class="badge badge-internal"><span class="badge-dot-sm"></span>Internal</span>`;
