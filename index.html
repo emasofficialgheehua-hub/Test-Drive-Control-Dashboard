@@ -133,7 +133,7 @@
   <div class="auto-bar-wrap"><div class="auto-bar" id="autoBar"></div></div>
 
   <div class="stats">
-    <div class="stat-card"><div class="stat-label">Total Today</div><div class="stat-value" id="statTotal">—</div><div class="stat-sub">registrations</div></div>
+    <div class="stat-card"><div class="stat-label">Last 30 Days</div><div class="stat-value" id="statTotal">—</div><div class="stat-sub">registrations</div></div>
     <div class="stat-card"><div class="stat-label">Customer Drives</div><div class="stat-value" id="statCustomer">—</div><div class="stat-sub">test drives</div></div>
     <div class="stat-card"><div class="stat-label">Internal Use</div><div class="stat-value" id="statInternal">—</div><div class="stat-sub">entries</div></div>
     <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value" id="statWeek">—</div><div class="stat-sub">registrations</div></div>
@@ -142,7 +142,7 @@
 
   <div class="toolbar">
     <span class="filter-label">Filter:</span>
-    <button class="filter-btn active" onclick="setFilter('today',this)">Today</button>
+    <button class="filter-btn active" onclick="setFilter('30days',this)">Last 30 Days</button>
     <button class="filter-btn" onclick="setFilter('week',this)">This Week</button>
     <button class="filter-btn" onclick="setFilter('all',this)">All Time</button>
     <div class="search-wrap">
@@ -185,11 +185,13 @@
 </div>
 
 <script>
-  const CSV_URL          = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTYPkaeQQcFfhKxjTnkV9MTGb0EYCxhPlFAL6yWYkF7k4_zDYwF2mV8i3QPtwztGny-6MQzj7kmyYYI/pub?output=csv';
+  // ── CONFIG ────────────────────────────────────────────────────────────────
+  const APPS_SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbzJ3NNrE99Au1X28Y2SEp0LtMPxUMYcakNTc-7_rnMTC1y7_qgP4LvOOKTavSYFyuEJcg/exec';
   const REFRESH_INTERVAL = 30000;
-  let allData = [], currentFilter = 'today', autoRefreshTimer;
 
-  // CLOCK
+  let allData = [], currentFilter = '30days', autoRefreshTimer;
+
+  // ── CLOCK ─────────────────────────────────────────────────────────────────
   function updateClock() {
     const now  = new Date();
     const date = now.toLocaleDateString('en-MY', { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
@@ -199,103 +201,69 @@
   setInterval(updateClock, 1000);
   updateClock();
 
-  // AUTO BAR
+  // ── AUTO PROGRESS BAR ─────────────────────────────────────────────────────
   function startAutoBar() {
     const bar = document.getElementById('autoBar');
-    bar.style.transition = 'none'; bar.style.width = '100%';
+    bar.style.transition = 'none';
+    bar.style.width = '100%';
     requestAnimationFrame(() => requestAnimationFrame(() => {
       bar.style.transition = `width ${REFRESH_INTERVAL}ms linear`;
       bar.style.width = '0%';
     }));
   }
 
-  // PARSE TIMESTAMP
-  function parseTimestamp(raw) {
-    if (!raw) return null;
-    let d = new Date(raw);
-    if (!isNaN(d)) return d;
-    const m = raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})[,\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?/);
-    if (m) {
-      const yr = m[3].length === 2 ? '20'+m[3] : m[3];
-      d = new Date(`${yr}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}T${m[4].padStart(2,'0')}:${m[5]}:${m[6]||'00'}`);
-      if (!isNaN(d)) return d;
-    }
-    return null;
-  }
-
-  // PARSE CSV
-  function parseCSV(text) {
-    const rows = [];
-    for (const line of text.split('\n')) {
-      if (!line.trim()) continue;
-      const cols = []; let cur = '', inQ = false;
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === '"') { inQ = !inQ; }
-        else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-        else { cur += ch; }
-      }
-      cols.push(cur.trim());
-      rows.push(cols);
-    }
-    return rows;
-  }
-
-  // FETCH
+  // ── FETCH via Apps Script doGet (JSON) ────────────────────────────────────
   async function fetchData(manual = false) {
     clearTimeout(autoRefreshTimer);
+
     if (manual) {
       const btn = document.getElementById('refreshBtn');
       btn.classList.add('spinning');
       setTimeout(() => btn.classList.remove('spinning'), 600);
     }
+
     try {
-      const res  = await fetch(CSV_URL + '&t=' + Date.now());
-      const text = await res.text();
-      const rows = parseCSV(text);
-      if (rows.length > 1) {
-        allData = rows.slice(1).filter(r => r[0]).map(r => {
-          const ts = parseTimestamp(r[0]);
-          return {
-            timestamp:       ts ? ts.toISOString() : '',
-            usageType:       r[1]  || '',
-            name:            r[2]  || '',
-            phone:           r[3]  || '',
-            vehicle:         r[4]  || '',
-            variant:         r[5]  || '',
-            carPlate:        r[6]  || '',
-            salesSpecialist: r[7]  || '',
-            startTime:       r[8]  || '',
-            notes:           r[9]  || '',
-            licenceLink:     r[10] || ''
-          };
-        });
-        updateStats();
-        renderTable();
-        document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString('en-MY');
-      }
-    } catch(err) {
+      const res  = await fetch(APPS_SCRIPT_URL + '?t=' + Date.now());
+      const json = await res.json();
+
+      if (!json.ok) throw new Error(json.message || 'Server returned ok:false');
+
+      allData = json.data || [];
+      updateStats();
+      renderTable();
+      document.getElementById('lastUpdated').textContent =
+        new Date().toLocaleTimeString('en-MY');
+
+    } catch (err) {
       document.getElementById('tableBody').innerHTML =
-        `<tr class="state-row"><td colspan="12">⚠️ ${err.message}<br><small>Ensure Google Sheet is published: File → Share → Publish to web</small></td></tr>`;
+        `<tr class="state-row"><td colspan="12">
+          ⚠️ ${err.message}<br>
+          <small style="opacity:.6">Check that the Apps Script is deployed as "Anyone" and re-deployed after latest changes.</small>
+        </td></tr>`;
     }
+
     startAutoBar();
     autoRefreshTimer = setTimeout(() => fetchData(), REFRESH_INTERVAL);
   }
 
-  // STATS
+  // ── STATS ─────────────────────────────────────────────────────────────────
   function updateStats() {
-    const today   = new Date().toDateString();
-    const weekAgo = new Date(Date.now() - 7*24*60*60*1000);
-    const todayRows = allData.filter(r => { const d=new Date(r.timestamp); return !isNaN(d) && d.toDateString()===today; });
-    const weekRows  = allData.filter(r => { const d=new Date(r.timestamp); return !isNaN(d) && d>=weekAgo; });
-    document.getElementById('statTotal').textContent    = todayRows.length;
-    document.getElementById('statCustomer').textContent = todayRows.filter(r => r.usageType==='Customer Test Drive').length;
-    document.getElementById('statInternal').textContent = todayRows.filter(r => r.usageType==='Internal Use').length;
+    const now        = Date.now();
+    const thirtyAgo  = new Date(now - 30 * 24 * 60 * 60 * 1000);
+    const weekAgo    = new Date(now -  7 * 24 * 60 * 60 * 1000);
+
+    // All stats scoped to last 30 days
+    const thirtyRows = allData.filter(r => r.timestamp && new Date(r.timestamp) >= thirtyAgo);
+    const weekRows   = thirtyRows.filter(r => new Date(r.timestamp) >= weekAgo);
+
+    document.getElementById('statTotal').textContent    = thirtyRows.length;
+    document.getElementById('statCustomer').textContent = thirtyRows.filter(r => r.usageType === 'Customer Test Drive').length;
+    document.getElementById('statInternal').textContent = thirtyRows.filter(r => r.usageType === 'Internal Use').length;
     document.getElementById('statWeek').textContent     = weekRows.length;
     document.getElementById('statAllTime').textContent  = allData.length;
   }
 
-  // FILTER
+  // ── FILTER ────────────────────────────────────────────────────────────────
   function setFilter(f, btn) {
     currentFilter = f;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -304,56 +272,81 @@
   }
 
   function getFiltered() {
-    const today   = new Date().toDateString();
-    const weekAgo = new Date(Date.now() - 7*24*60*60*1000);
-    const q       = document.getElementById('searchInput').value.toLowerCase();
-    let data = [...allData].reverse();
-    if (currentFilter==='today') data = data.filter(r => { const d=new Date(r.timestamp); return !isNaN(d)&&d.toDateString()===today; });
-    if (currentFilter==='week')  data = data.filter(r => { const d=new Date(r.timestamp); return !isNaN(d)&&d>=weekAgo; });
-    if (q) data = data.filter(r =>
-      [r.name,r.vehicle,r.carPlate,r.salesSpecialist,r.phone,r.variant]
-        .some(v => (v||'').toLowerCase().includes(q))
-    );
+    const now       = Date.now();
+    const thirtyAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+    const weekAgo   = new Date(now -  7 * 24 * 60 * 60 * 1000);
+    const q         = document.getElementById('searchInput').value.toLowerCase();
+
+    let data = [...allData].reverse(); // newest first
+
+    if (currentFilter === '30days') {
+      data = data.filter(r => r.timestamp && new Date(r.timestamp) >= thirtyAgo);
+    } else if (currentFilter === 'week') {
+      data = data.filter(r => r.timestamp && new Date(r.timestamp) >= weekAgo);
+    }
+    // 'all' = no date filter
+
+    if (q) {
+      data = data.filter(r =>
+        [r.name, r.vehicle, r.carPlate, r.salesSpecialist, r.phone, r.variant]
+          .some(v => (v || '').toLowerCase().includes(q))
+      );
+    }
     return data;
   }
 
-  // RENDER
+  // ── RENDER TABLE ──────────────────────────────────────────────────────────
   function renderTable() {
     const data  = getFiltered();
     const tbody = document.getElementById('tableBody');
-    document.getElementById('tableCount').textContent = `${data.length} record${data.length!==1?'s':''}`;
-    if (!data.length) { tbody.innerHTML=`<tr class="state-row"><td colspan="12">No records found</td></tr>`; return; }
+    document.getElementById('tableCount').textContent =
+      `${data.length} record${data.length !== 1 ? 's' : ''}`;
+
+    if (!data.length) {
+      tbody.innerHTML = `<tr class="state-row"><td colspan="12">No records found</td></tr>`;
+      return;
+    }
 
     tbody.innerHTML = data.map((r, i) => {
       const ts = r.timestamp
-        ? new Date(r.timestamp).toLocaleString('en-MY',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+        ? new Date(r.timestamp).toLocaleString('en-MY', {
+            day:'2-digit', month:'short', year:'numeric',
+            hour:'2-digit', minute:'2-digit'
+          })
         : '—';
-      const badge = r.usageType==='Customer Test Drive'
+
+      const badge = r.usageType === 'Customer Test Drive'
         ? `<span class="badge badge-customer"><span class="badge-dot-sm"></span>Customer</span>`
         : `<span class="badge badge-internal"><span class="badge-dot-sm"></span>Internal</span>`;
-      const licence = r.licenceLink && r.licenceLink!=='Upload failed' && r.licenceLink.startsWith('http')
+
+      const licence = r.licenceLink &&
+                      r.licenceLink !== 'Upload failed' &&
+                      r.licenceLink.startsWith('http')
         ? `<a class="licence-link" href="${r.licenceLink}" target="_blank">📄 View</a>`
         : `<span class="no-data">—</span>`;
+
       const notes = r.notes
-        ? `<span title="${r.notes}">${r.notes.length>25?r.notes.slice(0,25)+'…':r.notes}</span>`
+        ? `<span title="${r.notes}">${r.notes.length > 25 ? r.notes.slice(0,25) + '…' : r.notes}</span>`
         : `<span class="no-data">—</span>`;
+
       return `<tr>
-        <td style="color:var(--text-sec);font-size:12px;">${i+1}</td>
+        <td style="color:var(--text-sec);font-size:12px;">${i + 1}</td>
         <td style="font-size:12px;color:var(--text-sec);white-space:nowrap;">${ts}</td>
         <td>${badge}</td>
-        <td><strong style="font-size:13.5px;">${r.name||'—'}</strong></td>
-        <td style="font-size:13px;">${r.phone||'—'}</td>
-        <td><span class="vehicle-pill">${r.vehicle||'—'}</span></td>
-        <td style="font-size:12.5px;color:var(--text-sec);">${r.variant||'<span class="no-data">—</span>'}</td>
-        <td style="font-size:13px;font-weight:500;">${r.carPlate||'<span class="no-data">—</span>'}</td>
-        <td style="font-size:12.5px;">${r.salesSpecialist||'—'}</td>
-        <td style="font-size:12px;white-space:nowrap;">${r.startTime||'—'}</td>
+        <td><strong style="font-size:13.5px;">${r.name || '—'}</strong></td>
+        <td style="font-size:13px;">${r.phone || '—'}</td>
+        <td><span class="vehicle-pill">${r.vehicle || '—'}</span></td>
+        <td style="font-size:12.5px;color:var(--text-sec);">${r.variant || '<span class="no-data">—</span>'}</td>
+        <td style="font-size:13px;font-weight:500;">${r.carPlate || '<span class="no-data">—</span>'}</td>
+        <td style="font-size:12.5px;">${r.salesSpecialist || '—'}</td>
+        <td style="font-size:12px;white-space:nowrap;">${r.startTime || '—'}</td>
         <td style="font-size:12.5px;color:var(--text-sec);">${notes}</td>
         <td>${licence}</td>
       </tr>`;
     }).join('');
   }
 
+  // ── INIT ──────────────────────────────────────────────────────────────────
   fetchData();
 </script>
 </body>
