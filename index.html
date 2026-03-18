@@ -212,8 +212,8 @@
     }));
   }
 
-  // ── FETCH via Apps Script doGet (JSON) ────────────────────────────────────
-  async function fetchData(manual = false) {
+  // ── FETCH via JSONP (bypasses CORS on Apps Script) ───────────────────────
+  function fetchData(manual = false) {
     clearTimeout(autoRefreshTimer);
 
     if (manual) {
@@ -222,25 +222,47 @@
       setTimeout(() => btn.classList.remove('spinning'), 600);
     }
 
-    try {
-      const res  = await fetch(APPS_SCRIPT_URL + '?t=' + Date.now());
-      const json = await res.json();
+    // Show spinner only on first load
+    if (!allData.length) {
+      document.getElementById('tableBody').innerHTML =
+        `<tr class="state-row"><td colspan="12"><div class="spinner-lg"></div><br>Loading data…</td></tr>`;
+    }
 
-      if (!json.ok) throw new Error(json.message || 'Server returned ok:false');
+    // Remove any previous JSONP script tag
+    const old = document.getElementById('jsonp-script');
+    if (old) old.remove();
 
+    // Timeout fallback
+    const timer = setTimeout(() => {
+      document.getElementById('tableBody').innerHTML =
+        `<tr class="state-row"><td colspan="12">⚠️ Request timed out. Ensure Apps Script is deployed as <strong>Anyone</strong>.</td></tr>`;
+    }, 10000);
+
+    // Global callback — Apps Script wraps JSON in __jsonpCallback(...)
+    window.__jsonpCallback = function(json) {
+      clearTimeout(timer);
+      if (!json.ok) {
+        document.getElementById('tableBody').innerHTML =
+          `<tr class="state-row"><td colspan="12">⚠️ ${json.message || 'Unknown error from Apps Script'}</td></tr>`;
+        return;
+      }
       allData = json.data || [];
       updateStats();
       renderTable();
       document.getElementById('lastUpdated').textContent =
         new Date().toLocaleTimeString('en-MY');
+    };
 
-    } catch (err) {
+    // Inject script tag
+    const script = document.createElement('script');
+    script.id  = 'jsonp-script';
+    script.src = APPS_SCRIPT_URL + '?callback=__jsonpCallback&t=' + Date.now();
+    script.onerror = () => {
+      clearTimeout(timer);
       document.getElementById('tableBody').innerHTML =
-        `<tr class="state-row"><td colspan="12">
-          ⚠️ ${err.message}<br>
-          <small style="opacity:.6">Check that the Apps Script is deployed as "Anyone" and re-deployed after latest changes.</small>
-        </td></tr>`;
-    }
+        `<tr class="state-row"><td colspan="12">⚠️ Failed to load. Check Apps Script URL or network.</td></tr>`;
+    };
+    document.head.appendChild(script);
 
     startAutoBar();
     autoRefreshTimer = setTimeout(() => fetchData(), REFRESH_INTERVAL);
