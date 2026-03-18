@@ -174,9 +174,9 @@
   function updateClock() {
     var n = new Date();
     document.getElementById('clock').textContent =
-      n.toLocaleDateString('en-MY', {weekday:'short',day:'2-digit',month:'short',year:'numeric'}) +
+      n.toLocaleDateString('en-MY', {weekday:'short',day:'2-digit',month:'short',year:'numeric',timeZone:'Asia/Kuala_Lumpur'}) +
       '  |  ' +
-      n.toLocaleTimeString('en-MY', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      n.toLocaleTimeString('en-MY', {hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Asia/Kuala_Lumpur'});
   }
   setInterval(updateClock, 1000);
   updateClock();
@@ -190,13 +190,18 @@
     }); });
   }
 
-  /* MONDAY OF CURRENT WEEK IN LOCAL TIME */
+  /* MONDAY OF CURRENT WEEK IN KL TIME (UTC+8) */
   function weekStart() {
-    var d = new Date();
-    var day = d.getDay();
-    d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
-    d.setHours(0, 0, 0, 0);
-    return d;
+    var now = new Date();
+    // Get current day-of-week in KL time
+    var klDateStr = now.toLocaleDateString('en-MY', {weekday:'short', timeZone:'Asia/Kuala_Lumpur'});
+    var days = {Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
+    var day = days[klDateStr.split(',')[0]] || now.getDay();
+    var diff = day === 0 ? 6 : day - 1;
+    // Get midnight KL time by using date string
+    var klMidnight = new Date(now.toLocaleDateString('en-CA', {timeZone:'Asia/Kuala_Lumpur'}) + 'T00:00:00+08:00');
+    klMidnight.setDate(klMidnight.getDate() - diff);
+    return klMidnight;
   }
 
   /* PARSE TIMESTAMP — handles ISO and Google Sheets M/D/YYYY H:MM:SS */
@@ -252,7 +257,7 @@
         updateStats();
         renderTable();
         document.getElementById('lastUpdated').textContent =
-          new Date().toLocaleTimeString('en-MY');
+          new Date().toLocaleTimeString('en-MY', {timeZone:'Asia/Kuala_Lumpur'});
       })
       .catch(function(err) {
         // fetch blocked by CORS — fall back to JSONP
@@ -276,7 +281,7 @@
           updateStats();
           renderTable();
           document.getElementById('lastUpdated').textContent =
-            new Date().toLocaleTimeString('en-MY');
+            new Date().toLocaleTimeString('en-MY', {timeZone:'Asia/Kuala_Lumpur'});
         };
 
         var s = document.createElement('script');
@@ -347,7 +352,7 @@
 
     var rows = data.map(function(r, i) {
       var d  = r.timestamp ? new Date(r.timestamp) : null;
-      var ts = d ? d.toLocaleString('en-MY',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
+      var ts = d ? d.toLocaleString('en-MY',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kuala_Lumpur'}) : '-';
       var badge = r.usageType === 'Customer Test Drive'
         ? '<span class="badge badge-customer"><span class="badge-dot-sm"></span>Customer</span>'
         : '<span class="badge badge-internal"><span class="badge-dot-sm"></span>Internal</span>';
