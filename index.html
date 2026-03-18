@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Test Drive Dashboard</title>
+  <title>Test Drive Monitor</title>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -34,8 +34,6 @@
       pointer-events: none; z-index: 0;
     }
     .page { max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; }
-
-    /* TOPBAR */
     .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 14px; }
     .brand { display: flex; align-items: center; gap: 12px; }
     .brand-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 10px var(--teal); animation: blink 2s ease infinite; flex-shrink: 0; }
@@ -50,12 +48,8 @@
     .refresh-icon { font-size: 15px; display: inline-block; }
     .refresh-btn.spinning .refresh-icon { animation: spin .6s linear; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* AUTO BAR */
     .auto-bar-wrap { height: 2px; background: var(--border); border-radius: 999px; margin-bottom: 22px; overflow: hidden; }
     .auto-bar { height: 100%; background: var(--teal); border-radius: 999px; width: 100%; transition: width linear; }
-
-    /* STATS */
     .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 22px; }
     .stat-card { background: var(--navy-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 18px; position: relative; overflow: hidden; animation: fadeUp .4s ease both; }
     .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent, var(--teal)); border-radius: 16px 16px 0 0; }
@@ -68,8 +62,6 @@
     .stat-value { font-family: 'Rajdhani', sans-serif; font-size: 38px; font-weight: 700; line-height: 1; color: var(--accent, var(--teal)); }
     .stat-sub { font-size: 11px; color: var(--text-sec); margin-top: 5px; }
     @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-
-    /* TOOLBAR */
     .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
     .filter-label { font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.1em; }
     .filter-btn { background: var(--navy-card); border: 1px solid var(--border); border-radius: 7px; padding: 6px 13px; font-size: 12.5px; font-family: 'DM Sans', sans-serif; color: var(--text-sec); cursor: pointer; transition: all .2s; }
@@ -80,8 +72,6 @@
     .search-input::placeholder { color: rgba(122,143,170,.4); }
     .search-input:focus { border-color: var(--teal); }
     .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--text-sec); pointer-events: none; }
-
-    /* TABLE */
     .table-wrap { background: var(--navy-card); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.3); animation: fadeUp .5s ease both; animation-delay:.25s; }
     .table-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid var(--border); }
     .table-title { font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
@@ -94,7 +84,6 @@
     .tbl tbody tr:last-child { border-bottom: none; }
     .tbl tbody tr:hover { background: var(--navy-hov); }
     .tbl td { padding: 12px 14px; font-size: 13.5px; vertical-align: middle; }
-
     .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 6px; padding: 3px 9px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; white-space: nowrap; }
     .badge-customer { background: rgba(59,130,246,.12); color: #60a5fa; border: 1px solid rgba(59,130,246,.25); }
     .badge-internal  { background: rgba(245,158,11,.10); color: #fbbf24; border: 1px solid rgba(245,158,11,.22); }
@@ -103,10 +92,9 @@
     .licence-link { display: inline-flex; align-items: center; gap: 5px; color: var(--teal); font-size: 12px; text-decoration: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; background: var(--teal-dim); transition: border-color .15s; white-space: nowrap; }
     .licence-link:hover { border-color: var(--teal); }
     .no-data { font-size: 12px; color: rgba(122,143,170,.3); }
-    .state-row td { text-align: center; padding: 52px 20px; color: var(--text-sec); font-size: 14px; }
+    .state-row td { text-align: center; padding: 52px 20px; color: var(--text-sec); font-size: 14px; line-height: 2.2; }
     .spinner-lg { display: inline-block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 10px; }
     .last-updated { text-align: right; margin-top: 12px; font-size: 11px; color: rgba(122,143,170,.38); }
-
     @media (max-width: 900px) { .stats { grid-template-columns: repeat(3,1fr); } }
     @media (max-width: 600px) { .stats { grid-template-columns: 1fr 1fr; } body { padding: 16px 12px 50px; } .search-input { width: 150px; } }
   </style>
@@ -119,13 +107,13 @@
       <div class="brand-dot"></div>
       <div>
         <div class="brand-title">Test Drive <span>Monitor</span></div>
-        <div class="brand-sub">Proton e.MAS 3S Ghee Hua — Kuching</div>
+        <div class="brand-sub">Proton e.MAS 3S Ghee Hua &mdash; Kuching</div>
       </div>
     </div>
     <div class="topbar-right">
-      <div class="clock" id="clock">—</div>
+      <div class="clock" id="clock">--</div>
       <button class="refresh-btn" id="refreshBtn" onclick="fetchData(true)">
-        <span class="refresh-icon">↻</span> Refresh
+        <span class="refresh-icon">&#8635;</span> Refresh
       </button>
     </div>
   </div>
@@ -133,11 +121,11 @@
   <div class="auto-bar-wrap"><div class="auto-bar" id="autoBar"></div></div>
 
   <div class="stats">
-    <div class="stat-card"><div class="stat-label">Last 30 Days</div><div class="stat-value" id="statTotal">—</div><div class="stat-sub">registrations</div></div>
-    <div class="stat-card"><div class="stat-label">Customer Drives</div><div class="stat-value" id="statCustomer">—</div><div class="stat-sub">test drives</div></div>
-    <div class="stat-card"><div class="stat-label">Internal Use</div><div class="stat-value" id="statInternal">—</div><div class="stat-sub">entries</div></div>
-    <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value" id="statWeek">—</div><div class="stat-sub">registrations</div></div>
-    <div class="stat-card"><div class="stat-label">Total All Time</div><div class="stat-value" id="statAllTime">—</div><div class="stat-sub">all records</div></div>
+    <div class="stat-card"><div class="stat-label">Last 30 Days</div><div class="stat-value" id="statTotal">-</div><div class="stat-sub">registrations</div></div>
+    <div class="stat-card"><div class="stat-label">Customer Drives</div><div class="stat-value" id="statCustomer">-</div><div class="stat-sub">test drives</div></div>
+    <div class="stat-card"><div class="stat-label">Internal Use</div><div class="stat-value" id="statInternal">-</div><div class="stat-sub">entries</div></div>
+    <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value" id="statWeek">-</div><div class="stat-sub">Mon &ndash; today</div></div>
+    <div class="stat-card"><div class="stat-label">Total All Time</div><div class="stat-value" id="statAllTime">-</div><div class="stat-sub">all records</div></div>
   </div>
 
   <div class="toolbar">
@@ -146,235 +134,248 @@
     <button class="filter-btn" onclick="setFilter('week',this)">This Week</button>
     <button class="filter-btn" onclick="setFilter('all',this)">All Time</button>
     <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input class="search-input" id="searchInput" type="text" placeholder="Search name, vehicle, plate…" oninput="renderTable()" />
+      <span class="search-icon">&#128269;</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search name, vehicle, plate..." oninput="renderTable()" />
     </div>
   </div>
 
   <div class="table-wrap">
     <div class="table-header">
       <div class="table-title">Activity Log</div>
-      <div class="table-count" id="tableCount">— records</div>
+      <div class="table-count" id="tableCount">- records</div>
     </div>
     <div class="table-scroll">
       <table class="tbl">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Timestamp</th>
-            <th>Type</th>
-            <th>Customer</th>
-            <th>Phone</th>
-            <th>Vehicle</th>
-            <th>Variant</th>
-            <th>Car Plate</th>
-            <th>Sales Specialist</th>
-            <th>Departure</th>
-            <th>Notes</th>
-            <th>Licence</th>
+            <th>#</th><th>Timestamp</th><th>Type</th><th>Customer</th>
+            <th>Phone</th><th>Vehicle</th><th>Variant</th><th>Car Plate</th>
+            <th>Sales Specialist</th><th>Departure</th><th>Notes</th><th>Licence</th>
           </tr>
         </thead>
         <tbody id="tableBody">
-          <tr class="state-row"><td colspan="12"><div class="spinner-lg"></div><br>Loading data…</td></tr>
+          <tr class="state-row"><td colspan="12"><div class="spinner-lg"></div><br>Loading data...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <div class="last-updated">Last updated: <span id="lastUpdated">—</span> · Auto-refreshes every 30s</div>
+  <div class="last-updated">Last updated: <span id="lastUpdated">-</span> &nbsp;&middot;&nbsp; Auto-refreshes every 30s</div>
 </div>
 
 <script>
-  // ── CONFIG ────────────────────────────────────────────────────────────────
-  const APPS_SCRIPT_URL  = 'https://script.google.com/macros/s/AKfycbyi2Fu0MBih4cPktYOmwFNDNFrGhuNcQNLhTd3IWFXbs8L-hQ0n_SMTZnR1bCO7kPU4Pw/exec';
-  const REFRESH_INTERVAL = 30000;
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQgeQz5cKKxPkXlgCFqvXR-7l6Gg0nPAoxP5G5FLifHgkh8gT-E4VmQWod-FdBdZbNVA/exec';
+  var REFRESH_MS = 30000;
+  var allData = [];
+  var currentFilter = '30days';
+  var autoTimer = null;
 
-  let allData = [], currentFilter = '30days', autoRefreshTimer;
-
-  // ── CLOCK ─────────────────────────────────────────────────────────────────
+  /* CLOCK */
   function updateClock() {
-    const now  = new Date();
-    const date = now.toLocaleDateString('en-MY', { weekday:'short', day:'2-digit', month:'short', year:'numeric' });
-    const time = now.toLocaleTimeString('en-MY', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-    document.getElementById('clock').textContent = date + '  |  ' + time;
+    var n = new Date();
+    document.getElementById('clock').textContent =
+      n.toLocaleDateString('en-MY', {weekday:'short',day:'2-digit',month:'short',year:'numeric'}) +
+      '  |  ' +
+      n.toLocaleTimeString('en-MY', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
   }
   setInterval(updateClock, 1000);
   updateClock();
 
-  // ── AUTO PROGRESS BAR ─────────────────────────────────────────────────────
-  function startAutoBar() {
-    const bar = document.getElementById('autoBar');
-    bar.style.transition = 'none';
-    bar.style.width = '100%';
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      bar.style.transition = `width ${REFRESH_INTERVAL}ms linear`;
-      bar.style.width = '0%';
-    }));
+  /* PROGRESS BAR */
+  function startBar() {
+    var b = document.getElementById('autoBar');
+    b.style.transition = 'none'; b.style.width = '100%';
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      b.style.transition = 'width ' + REFRESH_MS + 'ms linear'; b.style.width = '0%';
+    }); });
   }
 
-  // ── FETCH via JSONP (bypasses CORS on Apps Script) ───────────────────────
-  function fetchData(manual = false) {
-    clearTimeout(autoRefreshTimer);
-
-    if (manual) {
-      const btn = document.getElementById('refreshBtn');
-      btn.classList.add('spinning');
-      setTimeout(() => btn.classList.remove('spinning'), 600);
-    }
-
-    // Show spinner only on first load
-    if (!allData.length) {
-      document.getElementById('tableBody').innerHTML =
-        `<tr class="state-row"><td colspan="12"><div class="spinner-lg"></div><br>Loading data…</td></tr>`;
-    }
-
-    // Remove any previous JSONP script tag
-    const old = document.getElementById('jsonp-script');
-    if (old) old.remove();
-
-    // Timeout fallback
-    const timer = setTimeout(() => {
-      document.getElementById('tableBody').innerHTML =
-        `<tr class="state-row"><td colspan="12">⚠️ Request timed out. Ensure Apps Script is deployed as <strong>Anyone</strong>.</td></tr>`;
-    }, 10000);
-
-    // Global callback — Apps Script wraps JSON in __jsonpCallback(...)
-    window.__jsonpCallback = function(json) {
-      clearTimeout(timer);
-      if (!json.ok) {
-        document.getElementById('tableBody').innerHTML =
-          `<tr class="state-row"><td colspan="12">⚠️ ${json.message || 'Unknown error from Apps Script'}</td></tr>`;
-        return;
-      }
-      allData = json.data || [];
-      updateStats();
-      renderTable();
-      document.getElementById('lastUpdated').textContent =
-        new Date().toLocaleTimeString('en-MY');
-    };
-
-    // Inject script tag
-    const script = document.createElement('script');
-    script.id  = 'jsonp-script';
-    script.src = APPS_SCRIPT_URL + '?callback=__jsonpCallback&t=' + Date.now();
-    script.onerror = () => {
-      clearTimeout(timer);
-      document.getElementById('tableBody').innerHTML =
-        `<tr class="state-row"><td colspan="12">⚠️ Failed to load. Check Apps Script URL or network.</td></tr>`;
-    };
-    document.head.appendChild(script);
-
-    startAutoBar();
-    autoRefreshTimer = setTimeout(() => fetchData(), REFRESH_INTERVAL);
-  }
-
-  // ── STATS ─────────────────────────────────────────────────────────────────
-  function getStartOfWeek() {
-    const d = new Date();
-    const day = d.getDay(); // 0=Sun, 1=Mon ...
-    const diff = day === 0 ? 6 : day - 1; // shift so Mon=0
+  /* MONDAY OF CURRENT WEEK IN LOCAL TIME */
+  function weekStart() {
+    var d = new Date();
+    var day = d.getDay();
+    d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
     d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() - diff);
     return d;
   }
 
+  /* PARSE TIMESTAMP — handles ISO and Google Sheets M/D/YYYY H:MM:SS */
+  function parseTS(raw) {
+    if (!raw) return null;
+    var d = new Date(raw);
+    if (!isNaN(d.getTime())) return d;
+    var m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})[,\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (m) {
+      d = new Date(+m[3], +m[1]-1, +m[2], +m[4], +m[5], +(m[6]||0));
+      if (!isNaN(d.getTime())) return d;
+    }
+    return null;
+  }
+
+  /* SHOW ERROR IN TABLE */
+  function showErr(msg) {
+    document.getElementById('tableBody').innerHTML =
+      '<tr class="state-row"><td colspan="12">&#9888;&#65039; ' + msg + '</td></tr>';
+  }
+
+  /* FETCH via fetch() with no-cors workaround using redirect:follow */
+  function fetchData(manual) {
+    clearTimeout(autoTimer);
+    if (manual) {
+      var btn = document.getElementById('refreshBtn');
+      btn.classList.add('spinning');
+      setTimeout(function(){ btn.classList.remove('spinning'); }, 600);
+    }
+    if (!allData.length) {
+      document.getElementById('tableBody').innerHTML =
+        '<tr class="state-row"><td colspan="12"><div class="spinner-lg"></div><br>Loading data...</td></tr>';
+    }
+
+    var url = SCRIPT_URL + '?t=' + Date.now();
+
+    fetch(url, { redirect: 'follow' })
+      .then(function(res) { return res.text(); })
+      .then(function(text) {
+        // Strip JSONP wrapper if present e.g. _gsCB({...})
+        var clean = text.trim();
+        var m = clean.match(/^[\w.]+\((.+)\)\s*;?\s*$/s);
+        if (m) clean = m[1];
+        var json = JSON.parse(clean);
+        if (!json || !json.ok) { showErr(json ? json.message : 'Apps Script returned ok:false'); return; }
+        allData = (json.data || []).map(function(r) {
+          if (r.timestamp) {
+            var d = parseTS(r.timestamp);
+            r.timestamp = (d && !isNaN(d.getTime())) ? d.toISOString() : '';
+          }
+          return r;
+        });
+        updateStats();
+        renderTable();
+        document.getElementById('lastUpdated').textContent =
+          new Date().toLocaleTimeString('en-MY');
+      })
+      .catch(function(err) {
+        // fetch blocked by CORS — fall back to JSONP
+        var old = document.getElementById('_gs');
+        if (old) old.parentNode.removeChild(old);
+
+        var tid = setTimeout(function(){
+          showErr('Timed out. Open the URL directly in browser to verify it returns JSON.');
+        }, 12000);
+
+        window._gsCB = function(json) {
+          clearTimeout(tid);
+          if (!json || !json.ok) { showErr(json ? json.message : 'Empty response'); return; }
+          allData = (json.data || []).map(function(r) {
+            if (r.timestamp) {
+              var d = parseTS(r.timestamp);
+              r.timestamp = (d && !isNaN(d.getTime())) ? d.toISOString() : '';
+            }
+            return r;
+          });
+          updateStats();
+          renderTable();
+          document.getElementById('lastUpdated').textContent =
+            new Date().toLocaleTimeString('en-MY');
+        };
+
+        var s = document.createElement('script');
+        s.id = '_gs';
+        s.src = SCRIPT_URL + '?callback=_gsCB&t=' + Date.now();
+        s.onerror = function() {
+          clearTimeout(tid);
+          showErr('Both fetch and JSONP failed: ' + err.message + '<br><small>Check Apps Script deployment access = <b>Anyone</b></small>');
+        };
+        document.head.appendChild(s);
+      });
+
+    startBar();
+    autoTimer = setTimeout(function(){ fetchData(); }, REFRESH_MS);
+  }
+
+  /* STATS */
   function updateStats() {
-    const thirtyAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const weekStart = getStartOfWeek();
-
-    const thirtyRows = allData.filter(r => r.timestamp && new Date(r.timestamp) >= thirtyAgo);
-    const weekRows   = allData.filter(r => r.timestamp && new Date(r.timestamp) >= weekStart);
-
-    document.getElementById('statTotal').textContent    = thirtyRows.length;
-    document.getElementById('statCustomer').textContent = thirtyRows.filter(r => r.usageType === 'Customer Test Drive').length;
-    document.getElementById('statInternal').textContent = thirtyRows.filter(r => r.usageType === 'Internal Use').length;
-    document.getElementById('statWeek').textContent     = weekRows.length;
+    var thirtyAgo = new Date(Date.now() - 30 * 86400000);
+    var ws = weekStart();
+    var t30 = allData.filter(function(r){ return r.timestamp && new Date(r.timestamp) >= thirtyAgo; });
+    var tw  = allData.filter(function(r){ return r.timestamp && new Date(r.timestamp) >= ws; });
+    document.getElementById('statTotal').textContent    = t30.length;
+    document.getElementById('statCustomer').textContent = t30.filter(function(r){ return r.usageType === 'Customer Test Drive'; }).length;
+    document.getElementById('statInternal').textContent = t30.filter(function(r){ return r.usageType === 'Internal Use'; }).length;
+    document.getElementById('statWeek').textContent     = tw.length;
     document.getElementById('statAllTime').textContent  = allData.length;
   }
 
-  // ── FILTER ────────────────────────────────────────────────────────────────
+  /* FILTER */
   function setFilter(f, btn) {
     currentFilter = f;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
     btn.classList.add('active');
     renderTable();
   }
 
   function getFiltered() {
-    const thirtyAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const weekStart = getStartOfWeek();
-    const q         = document.getElementById('searchInput').value.toLowerCase();
-
-    let data = [...allData].reverse(); // newest first
+    var thirtyAgo = new Date(Date.now() - 30 * 86400000);
+    var ws = weekStart();
+    var q  = document.getElementById('searchInput').value.toLowerCase();
+    var data = allData.slice().reverse();
 
     if (currentFilter === '30days') {
-      data = data.filter(r => r.timestamp && new Date(r.timestamp) >= thirtyAgo);
+      data = data.filter(function(r){ return r.timestamp && new Date(r.timestamp) >= thirtyAgo; });
     } else if (currentFilter === 'week') {
-      data = data.filter(r => r.timestamp && new Date(r.timestamp) >= weekStart);
+      data = data.filter(function(r){ return r.timestamp && new Date(r.timestamp) >= ws; });
     }
-    // 'all' = no date filter
-
     if (q) {
-      data = data.filter(r =>
-        [r.name, r.vehicle, r.carPlate, r.salesSpecialist, r.phone, r.variant]
-          .some(v => (v || '').toLowerCase().includes(q))
-      );
+      data = data.filter(function(r){
+        return [r.name, r.vehicle, r.carPlate, r.salesSpecialist, r.phone, r.variant]
+          .some(function(v){ return (v||'').toLowerCase().indexOf(q) !== -1; });
+      });
     }
     return data;
   }
 
-  // ── RENDER TABLE ──────────────────────────────────────────────────────────
+  /* RENDER */
   function renderTable() {
-    const data  = getFiltered();
-    const tbody = document.getElementById('tableBody');
-    document.getElementById('tableCount').textContent =
-      `${data.length} record${data.length !== 1 ? 's' : ''}`;
+    var data  = getFiltered();
+    var tbody = document.getElementById('tableBody');
+    document.getElementById('tableCount').textContent = data.length + ' record' + (data.length !== 1 ? 's' : '');
 
     if (!data.length) {
-      tbody.innerHTML = `<tr class="state-row"><td colspan="12">No records found</td></tr>`;
+      tbody.innerHTML = '<tr class="state-row"><td colspan="12">No records found</td></tr>';
       return;
     }
 
-    tbody.innerHTML = data.map((r, i) => {
-      const ts = r.timestamp
-        ? new Date(r.timestamp).toLocaleString('en-MY', {
-            day:'2-digit', month:'short', year:'numeric',
-            hour:'2-digit', minute:'2-digit'
-          })
-        : '—';
+    var rows = data.map(function(r, i) {
+      var d  = r.timestamp ? new Date(r.timestamp) : null;
+      var ts = d ? d.toLocaleString('en-MY',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
+      var badge = r.usageType === 'Customer Test Drive'
+        ? '<span class="badge badge-customer"><span class="badge-dot-sm"></span>Customer</span>'
+        : '<span class="badge badge-internal"><span class="badge-dot-sm"></span>Internal</span>';
+      var lic = r.licenceLink && r.licenceLink !== 'Upload failed' && r.licenceLink.indexOf('http') === 0
+        ? '<a class="licence-link" href="' + r.licenceLink + '" target="_blank">&#128196; View</a>'
+        : '<span class="no-data">-</span>';
+      var notes = r.notes
+        ? '<span title="' + r.notes + '">' + (r.notes.length > 25 ? r.notes.slice(0,25) + '...' : r.notes) + '</span>'
+        : '<span class="no-data">-</span>';
 
-      const badge = r.usageType === 'Customer Test Drive'
-        ? `<span class="badge badge-customer"><span class="badge-dot-sm"></span>Customer</span>`
-        : `<span class="badge badge-internal"><span class="badge-dot-sm"></span>Internal</span>`;
-
-      const licence = r.licenceLink &&
-                      r.licenceLink !== 'Upload failed' &&
-                      r.licenceLink.startsWith('http')
-        ? `<a class="licence-link" href="${r.licenceLink}" target="_blank">📄 View</a>`
-        : `<span class="no-data">—</span>`;
-
-      const notes = r.notes
-        ? `<span title="${r.notes}">${r.notes.length > 25 ? r.notes.slice(0,25) + '…' : r.notes}</span>`
-        : `<span class="no-data">—</span>`;
-
-      return `<tr>
-        <td style="color:var(--text-sec);font-size:12px;">${i + 1}</td>
-        <td style="font-size:12px;color:var(--text-sec);white-space:nowrap;">${ts}</td>
-        <td>${badge}</td>
-        <td><strong style="font-size:13.5px;">${r.name || '—'}</strong></td>
-        <td style="font-size:13px;">${r.phone || '—'}</td>
-        <td><span class="vehicle-pill">${r.vehicle || '—'}</span></td>
-        <td style="font-size:12.5px;color:var(--text-sec);">${r.variant || '<span class="no-data">—</span>'}</td>
-        <td style="font-size:13px;font-weight:500;">${r.carPlate || '<span class="no-data">—</span>'}</td>
-        <td style="font-size:12.5px;">${r.salesSpecialist || '—'}</td>
-        <td style="font-size:12px;white-space:nowrap;">${r.startTime || '—'}</td>
-        <td style="font-size:12.5px;color:var(--text-sec);">${notes}</td>
-        <td>${licence}</td>
-      </tr>`;
-    }).join('');
+      return '<tr>' +
+        '<td style="color:var(--text-sec);font-size:12px;">' + (i+1) + '</td>' +
+        '<td style="font-size:12px;color:var(--text-sec);white-space:nowrap;">' + ts + '</td>' +
+        '<td>' + badge + '</td>' +
+        '<td><strong>' + (r.name||'-') + '</strong></td>' +
+        '<td style="font-size:13px;">' + (r.phone||'-') + '</td>' +
+        '<td><span class="vehicle-pill">' + (r.vehicle||'-') + '</span></td>' +
+        '<td style="font-size:12.5px;color:var(--text-sec);">' + (r.variant||'-') + '</td>' +
+        '<td style="font-size:13px;font-weight:500;">' + (r.carPlate||'-') + '</td>' +
+        '<td style="font-size:12.5px;">' + (r.salesSpecialist||'-') + '</td>' +
+        '<td style="font-size:12px;white-space:nowrap;">' + (r.startTime||'-') + '</td>' +
+        '<td style="font-size:12.5px;color:var(--text-sec);">' + notes + '</td>' +
+        '<td>' + lic + '</td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = rows.join('');
   }
 
-  // ── INIT ──────────────────────────────────────────────────────────────────
   fetchData();
 </script>
 </body>
