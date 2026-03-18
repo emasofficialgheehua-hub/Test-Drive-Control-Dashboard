@@ -269,14 +269,21 @@
   }
 
   // ── STATS ─────────────────────────────────────────────────────────────────
-  function updateStats() {
-    const now        = Date.now();
-    const thirtyAgo  = new Date(now - 30 * 24 * 60 * 60 * 1000);
-    const weekAgo    = new Date(now -  7 * 24 * 60 * 60 * 1000);
+  function getStartOfWeek() {
+    const d = new Date();
+    const day = d.getDay(); // 0=Sun, 1=Mon ...
+    const diff = day === 0 ? 6 : day - 1; // shift so Mon=0
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - diff);
+    return d;
+  }
 
-    // All stats scoped to last 30 days
+  function updateStats() {
+    const thirtyAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const weekStart = getStartOfWeek();
+
     const thirtyRows = allData.filter(r => r.timestamp && new Date(r.timestamp) >= thirtyAgo);
-    const weekRows   = thirtyRows.filter(r => new Date(r.timestamp) >= weekAgo);
+    const weekRows   = allData.filter(r => r.timestamp && new Date(r.timestamp) >= weekStart);
 
     document.getElementById('statTotal').textContent    = thirtyRows.length;
     document.getElementById('statCustomer').textContent = thirtyRows.filter(r => r.usageType === 'Customer Test Drive').length;
@@ -294,9 +301,8 @@
   }
 
   function getFiltered() {
-    const now       = Date.now();
-    const thirtyAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
-    const weekAgo   = new Date(now -  7 * 24 * 60 * 60 * 1000);
+    const thirtyAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const weekStart = getStartOfWeek();
     const q         = document.getElementById('searchInput').value.toLowerCase();
 
     let data = [...allData].reverse(); // newest first
@@ -304,7 +310,7 @@
     if (currentFilter === '30days') {
       data = data.filter(r => r.timestamp && new Date(r.timestamp) >= thirtyAgo);
     } else if (currentFilter === 'week') {
-      data = data.filter(r => r.timestamp && new Date(r.timestamp) >= weekAgo);
+      data = data.filter(r => r.timestamp && new Date(r.timestamp) >= weekStart);
     }
     // 'all' = no date filter
 
